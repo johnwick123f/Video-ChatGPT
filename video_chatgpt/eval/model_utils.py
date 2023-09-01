@@ -99,10 +99,14 @@ def initialize_model(model_name, projection_path=None):
 
     # Load tokenizer
     tokenizer = AutoTokenizer.from_pretrained(model_name)
-
+    bnb_config = BitsAndBytesConfig(
+    load_in_4bit=True,
+    bnb_4bit_use_double_quant=True,
+    bnb_4bit_quant_type="nf4",
+    bnb_4bit_compute_dtype=torch.bfloat16
+    )
     # Load model
-    model = VideoChatGPTLlamaForCausalLM.from_pretrained(model_name, low_cpu_mem_usage=True, torch_dtype=torch.float16,
-                                                         use_cache=True)
+    model = VideoChatGPTLlamaForCausalLM.from_pretrained(model_name, low_cpu_mem_usage=True, torch_dtype=torch.float16, quantization_config=bnb_config, device_map="auto", use_cache=True)
 
     # Load image processor
     image_processor = CLIPImageProcessor.from_pretrained(model.config.mm_vision_tower, torch_dtype=torch.float16)
